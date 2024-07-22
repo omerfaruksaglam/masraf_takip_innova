@@ -10,6 +10,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+import java.time.DayOfWeek;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,12 +31,12 @@ public class ConsolidationJob {
 
         // Assuming we are consolidating for the previous day, week, and month
         LocalDate yesterday = today.minusDays(1);
-        LocalDate lastWeekStart = today.minusWeeks(1).withDayOfWeek(1);
-        LocalDate lastMonthStart = today.minusMonths(1).withDayOfMonth(1);
+        LocalDate lastWeekStart = today.minusWeeks(1).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate lastMonthStart = today.minusMonths(1).with(TemporalAdjusters.firstDayOfMonth());
 
         List<Long> userIds = transactionRepository.findAll()
                 .stream()
-                .map(Transaction::getUserId)
+                .map(Transaction::getId)
                 .distinct()
                 .collect(Collectors.toList());
 
